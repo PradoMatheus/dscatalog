@@ -8,12 +8,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
@@ -22,9 +22,9 @@ public class CategoryService {
     private CategoryRepository categoryRepository;
 
     @Transactional(readOnly = true)
-    public List<CategoryDto> findAll() {
-        var list = categoryRepository.findAll();
-        return list.stream().map(x -> new CategoryDto(x)).collect(Collectors.toList());
+    public Page<CategoryDto> findAllPaged(PageRequest pageRequest) {
+        var list = categoryRepository.findAll(pageRequest);
+        return list.map(x -> new CategoryDto(x));
     }
 
     @Transactional(readOnly = true)
@@ -57,9 +57,9 @@ public class CategoryService {
     public void delete(Long id) {
         try {
             categoryRepository.deleteById(id);
-        } catch (EmptyResultDataAccessException e){
+        } catch (EmptyResultDataAccessException e) {
             throw new ResourceNotFoundException(String.format("Id not found %d", id));
-        } catch (DataIntegrityViolationException e){
+        } catch (DataIntegrityViolationException e) {
             throw new DataIntegrityViolationException("Integrity Violation");
         }
     }
