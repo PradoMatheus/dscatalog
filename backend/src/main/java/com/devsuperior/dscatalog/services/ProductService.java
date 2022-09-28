@@ -1,10 +1,12 @@
 package com.devsuperior.dscatalog.services;
 
+import com.devsuperior.dscatalog.dto.CategoryDto;
 import com.devsuperior.dscatalog.dto.ProductDto;
+import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.entities.Product;
+import com.devsuperior.dscatalog.repositories.CategoryRepository;
 import com.devsuperior.dscatalog.repositories.ProductRepository;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -21,6 +23,9 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     @Transactional(readOnly = true)
     public Page<ProductDto> findAllPaged(PageRequest pageRequest) {
         var list = productRepository.findAll(pageRequest);
@@ -35,18 +40,19 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductDto insert(ProductDto ProductDto) {
+    public ProductDto insert(ProductDto productDto) {
         var product = new Product();
-        BeanUtils.copyProperties(ProductDto, product);
+        //  BeanUtils.copyProperties(productDto, product);
+        CopyDtoToEntity(productDto, product);
         product = productRepository.save(product);
         return new ProductDto(product);
     }
 
     @Transactional
-    public ProductDto update(Long id, ProductDto ProductDto) {
+    public ProductDto update(Long id, ProductDto productDto) {
         try {
             var entity = productRepository.getReferenceById(id);
-            entity.setName(ProductDto.getName());
+            CopyDtoToEntity(productDto, entity);
             entity = productRepository.save(entity);
             return new ProductDto(entity);
         } catch (EntityNotFoundException e) {
@@ -63,4 +69,19 @@ public class ProductService {
             throw new DataIntegrityViolationException("Integrity Violation");
         }
     }
+
+    private void CopyDtoToEntity(ProductDto productDto, Product product) {
+        product.setName(productDto.getName());
+        product.setDescription(productDto.getDescription());
+        product.setDate(productDto.getDate());
+        product.setImgUrl(productDto.getImgUrl());
+        product.setPrice(productDto.getPrice());
+
+        product.getCategories().clear();
+        for (CategoryDto catDto: productDto.getCategories()){
+            var category = categoryRepository.getReferenceById(catDto.getId());
+            product.getCategories().add(category);
+        }
+    }
+
 }
