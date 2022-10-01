@@ -2,7 +2,6 @@ package com.devsuperior.dscatalog.services;
 
 import com.devsuperior.dscatalog.dto.CategoryDto;
 import com.devsuperior.dscatalog.dto.ProductDto;
-import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.entities.Product;
 import com.devsuperior.dscatalog.repositories.CategoryRepository;
 import com.devsuperior.dscatalog.repositories.ProductRepository;
@@ -11,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,8 +26,8 @@ public class ProductService {
     private CategoryRepository categoryRepository;
 
     @Transactional(readOnly = true)
-    public Page<ProductDto> findAllPaged(PageRequest pageRequest) {
-        var list = productRepository.findAll(pageRequest);
+    public Page<ProductDto> findAllPaged(Pageable pageable) {
+        var list = productRepository.findAll(pageable);
         return list.map(x -> new ProductDto(x));
     }
 
@@ -78,7 +77,7 @@ public class ProductService {
         product.setPrice(productDto.getPrice());
 
         product.getCategories().clear();
-        for (CategoryDto catDto: productDto.getCategories()){
+        for (CategoryDto catDto : productDto.getCategories()) {
             var category = categoryRepository.getReferenceById(catDto.getId());
             product.getCategories().add(category);
         }
