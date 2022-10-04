@@ -6,6 +6,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.BeanUtils;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.PastOrPresent;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -18,10 +22,15 @@ public class ProductDto implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long id;
+    @Size(min = 5, max = 60, message = "Must have between 5 and 60 characters")
+    @NotBlank(message = "Required field")
     private String name;
+    @NotBlank(message = "Required field")
     private String description;
+    @Positive(message = "Price should is positive")
     private Double price;
     private String imgUrl;
+    @PastOrPresent(message = "Date does not can will future")
     private Instant date;
 
     private List<CategoryDto> categories = new ArrayList<>();
