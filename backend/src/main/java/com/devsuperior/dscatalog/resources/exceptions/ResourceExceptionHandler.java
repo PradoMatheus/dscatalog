@@ -52,7 +52,7 @@ public class ResourceExceptionHandler {
         for (FieldError f : e.getBindingResult().getFieldErrors()) {
             error.addError(f.getField(), f.getDefaultMessage());
         }
-        
+
         return ResponseEntity.status(status).body(error);
     }
 }
